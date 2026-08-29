@@ -32,10 +32,10 @@ class ReverseLookUpTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             A().m()
     
-    @unittest.skip("May not implement")
+    @unittest.skip("Will not implement")
     def test_B_uses_reversed_when_accessing_from_class(self):
         class A(ReverseLookup):
-            def m(self):
+            def m(self) -> str:
                 return 'A'
         
         class B(A):
@@ -59,3 +59,44 @@ class ReverseLookUpTest(unittest.TestCase):
                 return 'A'
         
         self.assertEqual(str(A()), 'A')
+    
+    def test_attributes_in_object_are_found(self):
+        class A(ReverseLookup):
+            ...
+        
+        a = A()
+        a.foo = "Bar"
+        
+        self.assertEqual(a.foo, "Bar")
+    
+    def test_attributes_in_object_from_class_are_found(self):
+        class A(ReverseLookup):
+            def __init__(self):
+                self.foo = "Bar"
+        a = A()
+        self.assertEqual(a.foo, "Bar")
+    
+    def test_attributes_in_object_from_slots_are_found(self):
+        class A(ReverseLookup):
+            __slots__ = ('foo', )
+            
+        a = A()
+        a.foo = "Bar"
+        self.assertEqual(a.foo, "Bar")
+    
+    def test_attributes_from_class_override_object(self):
+        class A(ReverseLookup):
+            foo = "Bar"
+        
+        a = A()
+        a.foo = "Zas"
+        self.assertEqual(a.foo, "Bar")
+    
+    def test_inner_works_with_instances(self):
+        class A(ReverseLookup):
+            def m(self):
+                return 'A' + Inner(self, A).m()
+        
+        a = A()
+        a.m = lambda: "a"
+        self.assertEqual(a.m(), "Aa")
