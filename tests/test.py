@@ -52,3 +52,10 @@ class ReverseLookUpTest(unittest.TestCase):
             ...
         
         self.assertListEqual(B.mro(), [object, ReverseLookup, A, B])
+    
+    def test_A_uses_its_own_to_string(self):
+        class A(ReverseLookup):
+            def __str__(self):
+                return 'A'
+        
+        self.assertEqual(str(A()), 'A')

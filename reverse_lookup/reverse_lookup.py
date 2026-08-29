@@ -14,8 +14,6 @@ def lookup(self: object, mro: tuple[type, ...], name: str):
 
 class ReverseLookup():
     def __getattribute__(self, name: str):
-        if name == ('__og_mro__', '__mro__'):
-            return super().__getattribute__(name)
         mro = super().__getattribute__('__class__').mro()
         return lookup(self, mro, name)
 
