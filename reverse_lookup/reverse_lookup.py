@@ -12,12 +12,16 @@ def lookup(self: object, mro: tuple[type, ...], name: str):
         return attr
     raise AttributeError(name=name, obj=self)
 
-class ReverseLookup:
-    __slots__ = tuple()
-    
+class ReverseLookup():
     def __getattribute__(self, name: str):
-        mro = getmro(object.__getattribute__(self, '__class__'))
-        return lookup(self, reversed(mro), name)
+        if name == ('__og_mro__', '__mro__'):
+            return super().__getattribute__(name)
+        mro = super().__getattribute__('__class__').mro()
+        return lookup(self, mro, name)
+
+    @classmethod
+    def mro(cls):
+        return list(reversed(cls.__mro__))
 
 class Inner:
     __slots__ = ('obj', 'start_type')
@@ -31,6 +35,6 @@ class Inner:
             return super().__getattribute__(name)
         start_type = self.start_type
         obj = self.obj
-        mro = getmro(object.__getattribute__(obj, '__class__'))
-        new_mro = reversed(mro[:mro.index(start_type)])
+        mro = object.__getattribute__(obj, '__class__').mro()
+        new_mro = mro[mro.index(start_type)+1:]
         return lookup(obj, new_mro, name)

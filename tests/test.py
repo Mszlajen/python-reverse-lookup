@@ -31,3 +31,24 @@ class ReverseLookUpTest(unittest.TestCase):
         
         with self.assertRaises(AttributeError):
             A().m()
+    
+    @unittest.skip("May not implement")
+    def test_B_uses_reversed_when_accessing_from_class(self):
+        class A(ReverseLookup):
+            def m(self):
+                return 'A'
+        
+        class B(A):
+            def m(self):
+                return 'B'
+        
+        self.assertEqual(B.m(B()), 'A')
+    
+    def test_B_has_a_reversed_mro(self):
+        class A(ReverseLookup):
+            ...
+        
+        class B(A):
+            ...
+        
+        self.assertListEqual(B.mro(), [object, ReverseLookup, A, B])
